@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Baixar projeto
+      - name: Baixar repositorio
         uses: actions/checkout@v4
 
       - name: Configurar Node.js
@@ -19,45 +19,50 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Mostrar ambiente
+      - name: Preparar projeto
         run: |
-          node --version
-          npm --version
-          pwd
+          mkdir app
+          unzip -q citologia-band7-ready.zip -d app
+          cd app
+          echo "===== ARQUIVOS DO APP ====="
           ls -la
-
-      - name: Conferir arquivos do projeto
-        run: |
-          echo "===== package.json ====="
-          cat package.json
           echo ""
-          echo "===== app.json ====="
+          echo "===== APP.JSON ====="
           cat app.json
+          echo ""
+          echo "===== PACKAGE.JSON ====="
+          cat package.json
 
       - name: Instalar dependencias
+        working-directory: app
         run: npm install
 
       - name: Instalar Zeus CLI
         run: npm install -g @zeppos/zeus-cli@1.8.2
 
-      - name: Conferir Zeus
-        run: zeus -v
+      - name: Conferir ambiente
+        run: |
+          node -v
+          npm -v
+          zeus -v
 
       - name: Descobrir target
         id: target
+        working-directory: app
         run: |
           TARGET=$(node -e "const app=require('./app.json'); console.log(Object.keys(app.targets)[0])")
           echo "Target encontrado: $TARGET"
           echo "target=$TARGET" >> "$GITHUB_OUTPUT"
 
       - name: Compilar aplicativo
-        run: |
-          zeus build -t "${{ steps.target.outputs.target }}"
+        working-directory: app
+        run: zeus build -t "${{ steps.target.outputs.target }}"
 
-      - name: Mostrar arquivos gerados
+      - name: Mostrar resultado
         if: always()
+        working-directory: app
         run: |
-          echo "===== RAIZ ====="
+          echo "===== ARQUIVOS ====="
           ls -la
           echo ""
           echo "===== DIST ====="
@@ -72,5 +77,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Citologia-Band-7
-          path: dist/
+          path: app/dist/
           if-no-files-found: error
