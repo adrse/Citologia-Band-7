@@ -1,0 +1,76 @@
+name: Build Citologia Band 7
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar projeto
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Mostrar ambiente
+        run: |
+          node --version
+          npm --version
+          pwd
+          ls -la
+
+      - name: Conferir arquivos do projeto
+        run: |
+          echo "===== package.json ====="
+          cat package.json
+          echo ""
+          echo "===== app.json ====="
+          cat app.json
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Instalar Zeus CLI
+        run: npm install -g @zeppos/zeus-cli@1.8.2
+
+      - name: Conferir Zeus
+        run: zeus -v
+
+      - name: Descobrir target
+        id: target
+        run: |
+          TARGET=$(node -e "const app=require('./app.json'); console.log(Object.keys(app.targets)[0])")
+          echo "Target encontrado: $TARGET"
+          echo "target=$TARGET" >> "$GITHUB_OUTPUT"
+
+      - name: Compilar aplicativo
+        run: |
+          zeus build -t "${{ steps.target.outputs.target }}"
+
+      - name: Mostrar arquivos gerados
+        if: always()
+        run: |
+          echo "===== RAIZ ====="
+          ls -la
+          echo ""
+          echo "===== DIST ====="
+          if [ -d dist ]; then
+            find dist -maxdepth 3 -type f -print
+          else
+            echo "Pasta dist nao foi criada."
+          fi
+
+      - name: Salvar aplicativo compilado
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Citologia-Band-7
+          path: dist/
+          if-no-files-found: error
