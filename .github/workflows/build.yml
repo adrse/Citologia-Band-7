@@ -21,17 +21,23 @@ jobs:
 
       - name: Preparar projeto
         run: |
-          mkdir app
-          unzip -q citologia-band7-ready-v2.zip -d app
-          cd app
+          mkdir -p app
+          mkdir -p extraido
+
+          unzip -q citologia-band7-ready-v2.zip -d extraido
+
+          cp -a extraido/citologia-band7-ready-v2/. app/
+
           echo "===== ARQUIVOS DO APP ====="
-          ls -la
+          ls -la app
+
           echo ""
           echo "===== APP.JSON ====="
-          cat app.json
+          cat app/app.json
+
           echo ""
           echo "===== PACKAGE.JSON ====="
-          cat package.json
+          cat app/package.json
 
       - name: Instalar dependencias
         working-directory: app
@@ -56,7 +62,9 @@ jobs:
 
       - name: Compilar aplicativo
         working-directory: app
-        run: zeus build -t "${{ steps.target.outputs.target }}"
+        run: |
+          echo "Compilando target: ${{ steps.target.outputs.target }}"
+          zeus build -t "${{ steps.target.outputs.target }}"
 
       - name: Mostrar resultado
         if: always()
@@ -64,10 +72,12 @@ jobs:
         run: |
           echo "===== ARQUIVOS ====="
           ls -la
+
           echo ""
           echo "===== DIST ====="
+
           if [ -d dist ]; then
-            find dist -maxdepth 3 -type f -print
+            find dist -maxdepth 5 -type f -print
           else
             echo "Pasta dist nao foi criada."
           fi
