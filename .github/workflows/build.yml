@@ -24,9 +24,9 @@ jobs:
           mkdir -p app
           mkdir -p extraido
 
-          unzip -q citologia-band7-ready-v2.zip -d extraido
+          unzip -q citologia-band7-appid-1128617.zip -d extraido
 
-          cp -a extraido/citologia-band7-ready-v2/. app/
+          cp -a extraido/citologia-band7-appid-1128617/. app/
 
           echo "===== ARQUIVOS DO APP ====="
           ls -la app
