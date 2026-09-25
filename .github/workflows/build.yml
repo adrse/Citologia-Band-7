@@ -22,7 +22,7 @@ jobs:
       - name: Preparar projeto
         run: |
           mkdir app
-          unzip -q citologia-band7-ready.zip -d app
+          unzip -q citologia-band7-ready-v2.zip -d app
           cd app
           echo "===== ARQUIVOS DO APP ====="
           ls -la
